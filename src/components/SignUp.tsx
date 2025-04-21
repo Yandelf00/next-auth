@@ -55,7 +55,7 @@ export default function SignUp() {
               h-[35px] p-2" 
               name="cpassword" /> 
             </div>
-            <button className="w-full h-[35px] bg-black text-white rounded-sm mt-2 ">Create account</button>
+            <button type='submit' className="w-full h-[35px] bg-black text-white rounded-sm mt-2 ">Create account</button>
           </form>
           <div className="w-full mt-5 flex justify-center items-center">
             <p className="text-gray-500 text-[13px] ">Already have an account?<span className="text-gray-600 font-bold "> Sign In</span></p>

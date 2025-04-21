@@ -39,7 +39,7 @@ export default function LoginForm() {
               h-[35px] p-2" 
               name="password" /> 
             </div>
-            <button className="w-full h-[35px] bg-black text-white rounded-sm mt-2 "> Sign in</button>
+            <button type="submit" className="w-full h-[35px] bg-black text-white rounded-sm mt-2 "> Sign in</button>
           </form>
           <div className="w-full mt-5 flex justify-center items-center">
             <p className="text-gray-500 text-[13px] ">Dont have an account?<span className="text-gray-600 font-bold "> Sign Up</span></p>
