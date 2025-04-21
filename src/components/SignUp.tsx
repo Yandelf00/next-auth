@@ -1,6 +1,11 @@
+"use client"
+
 import React from 'react'
+import { useActionState } from 'react'
+import { signUpUser } from '@/auth/nextjs/actions'
 
 export default function SignUp() {
+  const [state, formAction] = useActionState(signUpUser, null)
   return (
     <section className="h-full w-full flex justify-center items-center">
       <div className="h-full w-[500px] flex flex-col justify-center items-center ">
@@ -14,7 +19,7 @@ export default function SignUp() {
         </div>
         <div className="mt-5 w-[450px] h-[530px] p-5 bg-white border-1 border-gray-200 rounded-md">
           <h2 className="text-[20px] font-semibold ">Sign Up</h2> 
-          <form action="" className="flex flex-col mt-6 gap-4">
+          <form action={formAction} className="flex flex-col mt-6 gap-4">
             <div className="flex flex-col gap-2">
               <label htmlFor="fullname" className="font-semibold text-[15px] ">Full Name</label>
               <input 
