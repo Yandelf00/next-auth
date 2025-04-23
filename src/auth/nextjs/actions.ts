@@ -1,6 +1,9 @@
 "use server"
 import { loginSchema, signUpSchema } from "./schemas"
 import { z } from "zod"
+import prisma from "@/lib/prisma"
+import { generateSalt, hashPassword } from "../core/passwordHasher"
+import { redirect } from "next/navigation"
 
 type logResType = z.infer<typeof loginSchema>
 type sigResType = z.infer<typeof signUpSchema>
@@ -16,6 +19,7 @@ interface signUpInterface {
     message : string;
     errors : Record<string, string[]>
 }
+
 
 
 export async function loginUser(prevState: loginInterface | null, formdata : FormData) : Promise<loginInterface>{
@@ -35,6 +39,10 @@ export async function loginUser(prevState: loginInterface | null, formdata : For
     return { message : "", errors : {}};
 }
 
+
+// this function signs up the user.
+// it checks if the user exists, and if it doesn't 
+// it creates a new user and logs them in.
 export async function signUpUser(prevState: signUpInterface | null, formdata : FormData) : Promise<signUpInterface>{
     const rawFormData = {
         name : formdata.get("fullname"),
@@ -50,6 +58,47 @@ export async function signUpUser(prevState: signUpInterface | null, formdata : F
             message: "Validation failed",
         };
     }
-    console.log(result.data.name)
-    return { message : "", errors : {}};
+
+    if (result.data.password != result.data.confirmation){
+        return {
+            errors : {},
+            message : "your confirmation doesn't match your password",
+        }
+    }
+
+    const existingUser = await prisma.user.findUnique({
+        where : {
+            email : result.data.email,
+        }
+    })
+
+    if (existingUser != null) {
+        return {
+            errors : {}, 
+            message : "account already exists",
+        }
+    }
+
+    try {
+        const salt = generateSalt()
+        const hashedPassword = await hashPassword(result.data.password, salt)
+        const user = await prisma.user.create({
+            data : {
+                name : result.data.name,
+                email : result.data.email,
+                password : hashedPassword,
+                salt : salt,
+            }
+        })
+
+        if (user == null) return {errors : {}, message : "unable to create account"}
+    } catch {
+        return {
+            errors : {},
+            message : "unable to create account",
+        }
+    }
+
+    redirect("/")
 }
+
