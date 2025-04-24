@@ -4,6 +4,8 @@ import { z } from "zod"
 import prisma from "@/lib/prisma"
 import { generateSalt, hashPassword } from "../core/passwordHasher"
 import { redirect } from "next/navigation"
+import { createUserSession } from "../core/session"
+import { cookies } from "next/headers"
 
 type logResType = z.infer<typeof loginSchema>
 type sigResType = z.infer<typeof signUpSchema>
@@ -92,6 +94,8 @@ export async function signUpUser(prevState: signUpInterface | null, formdata : F
         })
 
         if (user == null) return {errors : {}, message : "unable to create account"}
+
+        await createUserSession(user.id, user.role, await cookies())
     } catch {
         return {
             errors : {},
