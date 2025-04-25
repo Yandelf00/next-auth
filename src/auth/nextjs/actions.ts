@@ -2,9 +2,9 @@
 import { loginSchema, signUpSchema } from "./schemas"
 import { z } from "zod"
 import prisma from "@/lib/prisma"
-import { generateSalt, hashPassword } from "../core/passwordHasher"
+import { comparePasswords, generateSalt, hashPassword } from "../core/passwordHasher"
 import { redirect } from "next/navigation"
-import { createUserSession } from "../core/session"
+import { createUserSession, removeUserFromSession } from "../core/session"
 import { cookies } from "next/headers"
 
 type logResType = z.infer<typeof loginSchema>
@@ -24,6 +24,7 @@ interface signUpInterface {
 
 
 
+
 export async function loginUser(prevState: loginInterface | null, formdata : FormData) : Promise<loginInterface>{
     const rawFormData = {
         email : formdata.get("email"),
@@ -37,8 +38,31 @@ export async function loginUser(prevState: loginInterface | null, formdata : For
             message: "Validation failed",
         };
     }
-    console.log(result.data.email)
-    return { message : "", errors : {}};
+
+    const user = await prisma.user.findUnique({
+        where : {
+            email : result.data.email,
+        }
+    })
+
+    if (user == null){
+        return {
+            errors : {},
+            message : "Unable to log you in"
+        }
+    }
+
+    const isCorrectPassword = await comparePasswords({
+        hashedPassword : user.password,
+        password : result.data.password,
+        salt : user.salt,
+    })
+
+    if (!isCorrectPassword) return {errors: {}, message : "Unable to log you in"}
+
+    await createUserSession(user.id, user.role, await cookies())
+
+    redirect("/")
 }
 
 
@@ -106,3 +130,7 @@ export async function signUpUser(prevState: signUpInterface | null, formdata : F
     redirect("/")
 }
 
+export async function logOut(){
+    await removeUserFromSession(await cookies())
+    redirect('/')
+}

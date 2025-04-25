@@ -31,3 +31,4 @@ export async function comparePasswords({
 export function generateSalt() {
   return crypto.randomBytes(16).toString("hex").normalize()
 }
+

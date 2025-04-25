@@ -1,6 +1,9 @@
 import Image from "next/image";
 import LoginForm from "@/components/Login";
 import { getCurrentUser } from "@/auth/nextjs/currentUser";
+import { LogOutButton } from "@/components/LogoutButton";
+
+
 export default async function Home() {
   const user = await getCurrentUser()
   return (
@@ -12,6 +15,7 @@ export default async function Home() {
       ) : (
         <div>
           {user.name}
+          <LogOutButton/>
         </div>
       )}
     </main>

@@ -67,6 +67,18 @@ export async function createUserSession(id: number, role : Role, cookies: Pick<C
     }
 }
 
+export async function removeUserFromSession(cookies : Pick<Cookies, "get" | "delete">){
+    const sessionId = cookies.get(COOKIE_SESSION_KEY)?.value    
+    if (sessionId == null) return null
+   
+    await prisma.session.delete({
+        where : {
+            id : sessionId
+        }
+    })
+    cookies.delete(COOKIE_SESSION_KEY)
+}
+
 function setCookie(sessionId : string, cookies : Pick<Cookies, "set">){
     cookies.set(COOKIE_SESSION_KEY, sessionId, {
         secure : true,
@@ -75,3 +87,4 @@ function setCookie(sessionId : string, cookies : Pick<Cookies, "set">){
         expires : Date.now() + SESSION_EXPIRATION_SECONDS,
     })
 }
+
